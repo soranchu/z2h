@@ -1,0 +1,22 @@
+body{
+}
+div.popup_base{
+	width:250px;
+	font-size :small;
+}
+
+.selectable{
+	background: #FFF;
+	padding: 3px;
+	margin-bottom: 3px;
+}
+.selectable:HOVER{
+	background: #DDF;
+	cursor:pointer;
+}
+
+.setting{
+	float:right;
+}
+
+

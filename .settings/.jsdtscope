@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.JRE_CONTAINER"/>
+	<classpathentry excluding="js/classes/|lib/|js/" kind="src" path="fancy-settings/source"/>
+	<classpathentry excluding="classes/" kind="src" path="fancy-settings/source/js"/>
+	<classpathentry kind="src" path="fancy-settings/source/js/classes"/>
+	<classpathentry kind="src" path="fancy-settings/source/lib"/>
+	<classpathentry kind="src" path="js"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.wst.jsdt.launching.baseBrowserLibrary/StandardBrowser/html5"/>
+	<classpathentry exported="true" kind="con" path="org.eclipselabs.jsdt.jquery.core.CoflictLibrary_1.7"/>
+	<classpathentry kind="output" path=""/>
+</classpath>
