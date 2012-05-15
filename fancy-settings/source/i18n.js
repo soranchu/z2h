@@ -33,6 +33,15 @@ this.i18n = {
     },
 	"replace_space": {
         "ja": "全角スペースを半角に変換する"
+    },
+	"ignore_settings": {
+        "ja": "ignore settings"
+    },
+	"ignore_urls": {
+        "ja": "ignore urls"
+    },
+	"ignore_domains": {
+        "ja": "ignore domains"
     }
 
 };

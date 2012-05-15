@@ -2,7 +2,7 @@
 var diff = 'Ａ'.charCodeAt(0) - 'A'.charCodeAt(0);
 
 function log(str){
-	//console.log(str);
+	console.log(str);
 }
 
 log("request isEnabled: " + location.host);
@@ -30,17 +30,15 @@ function makeRegExp(settings){
 	
 	return new RegExp("[" + pat + "]","g" );
 }
-
-chrome.extension.sendRequest({"cmd":"isEnabled", "url":location.href}, function(res){
+chrome.extension.sendRequest({"cmd":"loaded", "url":location.href, "iframe":(self!==top)}, function(res){
 	var replaced = 0;
-	var enabled = res.enabled;
-	var isFrame = res.iframe;
+	var siteStatus = res.siteStatus;
 	var settings = res.settings;
 
 	var matcher = makeRegExp(settings);
 	
-	log("response isEnabled :" + enabled);
-	if( enabled == "" && matcher != null ){
+	log("loaded response. siteStatus :" + siteStatus);
+	if( siteStatus == "ENABLE" && matcher != null ){
 		$("body *:not(iframe)").andSelf().contents().filter(function(){return this.nodeType==Node.TEXT_NODE;}).each(function(){
 			this.textContent = this.textContent.replace(matcher,function(matched){
 				replaced++;
@@ -50,8 +48,8 @@ chrome.extension.sendRequest({"cmd":"isEnabled", "url":location.href}, function(
 				return String.fromCharCode(matched.charCodeAt(0)-diff);
 			});
 		});
-		log("request update replaced :"+replaced);
-		chrome.extension.sendRequest({"cmd":"update","replaced":replaced,"iframe":isFrame}, function(res){} );
+		log("request update. replaced :"+replaced);
+		chrome.extension.sendRequest({"cmd":"update","replaced":replaced,"iframe":(self!==top)}, function(res){} );
 	}
 });
 

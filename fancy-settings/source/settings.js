@@ -1,10 +1,18 @@
 window.addEvent("domready", function () {
     // Option 1: Use the manifest:
     new FancySettings.initWithManifest(function (settings) {
-        settings.manifest.myButton.addEvent("action", function () {
+        /*settings.manifest.myButton.addEvent("action", function () {
             alert("You clicked me!");
         });
+        settings.create({
+            "tab": i18n.get("details"),
+            "group": i18n.get("ignore_settings"),
+            "name": "ignorePages",
+            "type": "text",
+            "label": i18n.get("ignore_urls")
+        });*/
     });
+    
     
     // Option 2: Do everything manually:
     /*
