@@ -1,22 +1,89 @@
 body{
+    margin: 0;
 }
+
+HR{
+	border:none;
+	border-top:solid 1px #CCF;
+	margin : 0;
+}
+
 div.popup_base{
-	width:250px;
+	width:280px;
 	font-size :small;
 }
 
+.status{
+	padding: 7px;
+/* 	background: rgb(245, 239, 233); */
+	border-radius: 3px 3px 0px 0px;
+	border-top: solid 3px rgb(204,0,51);
+/* 	box-shadow: 0px 2px 8px rgba(233,214,183,0.6); */
+	color: #666;
+}
+
+.arrow{
+	background-image: url("/res/arrow_gray.png");
+	background-repeat: no-repeat;
+	width: 20px;
+	height: 10px;
+	-webkit-box-ordinal-group:1;
+}
+.item:HOVER .arrow{
+	background-image: url("/res/arrow_red.png");
+}
+
+.item .text{
+	-webkit-box-ordinal-group:2;
+	padding-right:20px;
+}
+
+.item{
+	display: -webkit-box;
+}
+
+ul{
+	list-style-position: inside;
+	-webkit-padding-start: 0;
+	-webkit-padding-before: 0px;
+	list-style-image: url("/res/arrow-gray.png");
+}
+
 .selectable{
-	background: #FFF;
-	padding: 3px;
-	margin-bottom: 3px;
+	padding: 10px;
+	padding-left: 10px;
+	-webkit-user-select: none;
 }
 .selectable:HOVER{
-	background: #DDF;
 	cursor:pointer;
+	background:rgba(255, 238, 238, 0.5) -webkit-radial-gradient(center, ellipse , rgba(255, 221, 221, 1) 0%,rgba(255, 238, 238, 0.5) 70%,rgba(255, 255, 255, 0) 80%);
+}
+
+.appname{
+	padding: 7px;
+	width: auto;
+	font-size: x-small;
 }
 
 .setting{
 	float:right;
+	padding: 6px;
+	color: #000;
+	font-size: x-small;
+    color: #FDD;
+	text-decoration: underline;
 }
-
-
+.setting:hover{
+    background: -webkit-linear-gradient(top, #B8002E 0%, #C03 100%);
+	
+}
+.footer {
+    background: -webkit-linear-gradient(top, #C03 0%, #B8002E 100%);
+    border-radius: 0px 0px 3px 3px;
+    color: #FDD;
+    border-top: solid 1px hsl(345, 100%, 70%);
+    text-shadow : 0px -1px 0px rgba(80,40,40,0.5);
+}
+.clear {
+    clear: both;
+}

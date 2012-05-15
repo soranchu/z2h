@@ -13,14 +13,18 @@
 		case "":
 			$("#status_ph").text(bg.tabStatus[tab.id].status);
 			$("<div>").addClass("item selectable")
-				.text("このページでの半角変換を無効にする").appendTo(".items")
+				.append('<div class="arrow">')
+				.append('<div class="text">このページでの半角変換を無効にする</div>')
+				.appendTo(".items")
 				.click(function(){
 					bg.addIgnorePage(tab.url);
 					chrome.tabs.reload(tab.id);
 					window.close();
 				});
 			$("<div>").addClass("item selectable")
-				.text("このドメイン("+domain+")での半角変換を無効にする").appendTo(".items")
+				.append('<div class="arrow">')
+				.append('<div class="text">このドメイン('+domain+')での半角変換を無効にする</div>')
+				.appendTo(".items")
 				.click(function(){
 					bg.addIgnoreDomain(domain);
 					chrome.tabs.reload(tab.id);
@@ -30,7 +34,9 @@
 		case "IGNORE_PAGE":
 			$("#status_ph").text(bg.tabStatus[tab.id].status);
 			$("<div>").addClass("item selectable")
-				.text("このページでの半角変換を有効にする").appendTo(".items")
+				.append('<div class="arrow">')
+				.append('<div class="text">このページでの半角変換を有効にする</div>')
+				.appendTo(".items")
 				.click(function(){
 					bg.removeIgnorePage(tab.url);
 					chrome.tabs.reload(tab.id);
@@ -40,7 +46,9 @@
 		case "IGNORE_DOMAIN":
 			$("#status_ph").text(bg.tabStatus[tab.id].status);
 			$("<div>").addClass("item selectable")
-				.text("このドメイン("+domain+")での半角変換を有効にする").appendTo(".items")
+				.append('<div class="arrow">')
+				.append('<div class="text">このドメイン('+domain+')での半角変換を有効にする</div>')
+				.appendTo(".items")
 				.click(function(){
 					bg.removeIgnoreDomain(tab.url);
 					chrome.tabs.reload(tab.id);
