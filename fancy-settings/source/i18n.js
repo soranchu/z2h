@@ -35,13 +35,16 @@ this.i18n = {
         "ja": "全角スペースを半角に変換する"
     },
 	"ignore_settings": {
-        "ja": "ignore settings"
+        "ja": "変換を行わないURL"
     },
-	"ignore_urls": {
-        "ja": "ignore urls"
+	"ignore_desc_text": {
+        "ja": "変換を行わないページ、ドメインを管理できます。ひとつのURLにつき1行で入力してください。"
+    },
+	"ignore_pages": {
+        "ja": "ページ指定"
     },
 	"ignore_domains": {
-        "ja": "ignore domains"
+        "ja": "ドメイン指定"
     }
 
 };

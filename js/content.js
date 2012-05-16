@@ -39,6 +39,7 @@ chrome.extension.sendRequest({"cmd":"loaded", "url":location.href, "iframe":(sel
 	
 	log("loaded response. siteStatus :" + siteStatus);
 	if( siteStatus == "ENABLE" && matcher != null ){
+		//TODO:except form input 
 		$("body *:not(iframe)").andSelf().contents().filter(function(){return this.nodeType==Node.TEXT_NODE;}).each(function(){
 			this.textContent = this.textContent.replace(matcher,function(matched){
 				replaced++;

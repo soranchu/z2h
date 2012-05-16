@@ -7,26 +7,28 @@
 	chrome.tabs.getSelected(null, function(tab){
 		var siteStatus = bg.tabStatus[tab.id] ? bg.tabStatus[tab.id].siteStatus : "ENABLE";
 		//var replaced =  bg.tabStatus[tab.id] ? bg.tabStatus[tab.id].replaced : 0;
-		var domain = tab.url.match( /http:\/\/([^\/]+)/ )[1];
-		
+		var match = bg.urlMatcher( tab.url );
+		if( !match || match.length <= 3 ){
+			return;
+		}
 		switch(siteStatus){
 		case "ENABLE":
 			$("#status_ph").text(bg.tabStatus[tab.id].status);
 			$("<div>").addClass("item selectable")
 				.append('<div class="arrow">')
-				.append('<div class="text">このページでの半角変換を無効にする</div>')
+				.append('<div class="text">このページ('+match[2]+')での半角変換を無効にする</div>')
 				.appendTo(".items")
 				.click(function(){
-					bg.addIgnorePage(tab.url);
+					bg.addIgnorePage(match[2]);
 					chrome.tabs.reload(tab.id);
 					window.close();
 				});
 			$("<div>").addClass("item selectable")
 				.append('<div class="arrow">')
-				.append('<div class="text">このドメイン('+domain+')での半角変換を無効にする</div>')
+				.append('<div class="text">このドメイン('+match[3]+')での半角変換を無効にする</div>')
 				.appendTo(".items")
 				.click(function(){
-					bg.addIgnoreDomain(domain);
+					bg.addIgnoreDomain(match[3]);
 					chrome.tabs.reload(tab.id);
 					window.close();
 				});
@@ -38,7 +40,7 @@
 				.append('<div class="text">このページでの半角変換を有効にする</div>')
 				.appendTo(".items")
 				.click(function(){
-					bg.removeIgnorePage(tab.url);
+					bg.removeIgnorePage(match[2]);
 					chrome.tabs.reload(tab.id);
 					window.close();
 				});
@@ -47,10 +49,10 @@
 			$("#status_ph").text(bg.tabStatus[tab.id].status);
 			$("<div>").addClass("item selectable")
 				.append('<div class="arrow">')
-				.append('<div class="text">このドメイン('+domain+')での半角変換を有効にする</div>')
+				.append('<div class="text">このドメイン('+match[3]+')での半角変換を有効にする</div>')
 				.appendTo(".items")
 				.click(function(){
-					bg.removeIgnoreDomain(tab.url);
+					bg.removeIgnoreDomain(match[3]);
 					chrome.tabs.reload(tab.id);
 					window.close();
 				});

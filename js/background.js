@@ -18,6 +18,8 @@ importOldSettings();
 createTranslateTable();
 
 function importOldSettings(){
+	
+	// import old localStorage settings
 	var pages = localStorage["ignorePages"];
 	var domains = localStorage["ignoreDomains"];
 
@@ -44,6 +46,30 @@ function importOldSettings(){
 	localStorage.removeItem("ignorePages");
 	localStorage.removeItem("ignoreDomains");
 	
+	//update ignore page/domain urls
+	var pat = settings.get("patternTable");
+	if( ! pat || pat._version <= 2 ){
+	
+		var ignorePages = settings.get("ignorePages");
+		for( var i = 0 ; i < ignorePages.length; ++ i){
+			var url = ignorePages[i];
+			var match = url.match(/((https?|file):\/\/)?(([^\/]+)\/[^?#]*)/);
+			if( match && match.length > 4 ){
+				ignorePages[i] = match[3];
+			}
+		}
+		settings.set("ignorePages",ignorePages);
+	
+		var ignoreDomains = settings.get("ignoreDomains");
+		for( var i = 0 ; i < ignoreDomains.length; ++ i){
+			var url = ignoreDomains[i];
+			var match = url.match(/((https?|file):\/\/)?(([^\/]+)\/[^?#]*)/);
+			if( match && match.length > 4 ){
+				ignorePages[i] = match[4];
+			}
+		}
+		settings.set("ignoreDomains",ignoreDomains);
+	}
 }
 
 function arrayContains(arr, val){
@@ -66,7 +92,7 @@ function createTranslateTable(){
 		pat.tilde = makePattern([{from:'～',to:'～'}]);
 		pat.space = makePattern([{from:'　',to:'　'}]);
 	
-		pat._version = 2;
+		pat._version = 2.1;
 		
 		settings.set("patternTable", pat);
 	}
@@ -107,8 +133,10 @@ function getManifest(cb){
 
 function addIgnorePage(url){
 	var ignorePages = settings.get("ignorePages");
-	ignorePages.push(url);
-	settings.set("ignorePages",ignorePages);
+	if( !arrayContains(ignorePages, url) ){
+		ignorePages.push(url);
+		settings.set("ignorePages",ignorePages);
+	}
 }
 function removeIgnorePage(url){
 	var ignorePages = settings.get("ignorePages");
@@ -122,8 +150,10 @@ function removeIgnorePage(url){
 }
 function addIgnoreDomain(url){
 	var ignoreDomains = settings.get("ignoreDomains");
-	ignoreDomains.push("http://"+url);
-	settings.set("ignoreDomains",ignoreDomains);
+	if( !arrayContains(ignoreDomains, url) ){
+		ignoreDomains.push(url);
+		settings.set("ignoreDomains",ignoreDomains);
+	}
 }
 
 function removeIgnoreDomain(url){
@@ -137,19 +167,22 @@ function removeIgnoreDomain(url){
 	}
 }
 function getSiteStatus(url){
-	var ignorePages = settings.get("ignorePages");
-	for(var i = 0; i < ignorePages.length; ++i){
-		if( url == ignorePages[i] ){
+	var match = urlMatcher(url);
+	if( match && match.length > 3){
+		var ignorePages = settings.get("ignorePages");
+		if( arrayContains(ignorePages, match[2]) ){
 			return "IGNORE_PAGE";
 		}
-	}
-	var ignoreDomains = settings.get("ignoreDomains");
-	for(var i = 0; i < ignoreDomains.length; ++i){
-		if( url.indexOf(ignoreDomains[i]) == 0 ){
+		var ignoreDomains = settings.get("ignoreDomains");
+		if( arrayContains(ignoreDomains, match[3]) ){
 			return "IGNORE_DOMAIN";
 		}
 	}
 	return "ENABLE";
+}
+
+function urlMatcher(url){
+	return url && url.match(/(https?|file):\/\/(([^\/]+)\/[^?#]*)/);
 }
 
 function setIconStatus(tabid){
@@ -169,21 +202,24 @@ function setIconStatus(tabid){
 			enabled = true;
 			visible = false;
 		}
-	}
-	
-	chrome.pageAction.setIcon({
-		"tabId":tabid,
-		"path":enabled ? "res/icon_19_red.png" : "res/icon_19_gray.png"
-	});
-	chrome.pageAction.setTitle({
-		"tabId":tabid,
-		"title":tabStatus[tabid].status
-	});
-	if( visible ){
-		chrome.pageAction.show(tabid);
+
+		chrome.pageAction.setIcon({
+			"tabId":tabid,
+			"path":enabled ? "res/icon_19_red.png" : "res/icon_19_gray.png"
+		});
+		chrome.pageAction.setTitle({
+			"tabId":tabid,
+			"title":tabStatus[tabid].status
+		});
+		if( visible ){
+			chrome.pageAction.show(tabid);
+		}else{
+			chrome.pageAction.hide(tabid);
+		}
 	}else{
 		chrome.pageAction.hide(tabid);
 	}
+	
 }
 
 function onTabUpdated(tabId, changeInfo, tab){

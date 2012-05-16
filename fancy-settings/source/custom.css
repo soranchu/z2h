@@ -2,3 +2,10 @@
 // Add your own style rules here, not in css/main.css
 // or css/setting.css for easy updating reasons.
 */
+.setting.element.multitext{
+	display:block;
+    height: 120px;
+    margin-left: 24px;
+    vertical-align: top;
+}
+

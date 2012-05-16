@@ -10,7 +10,7 @@
 	"background_page" : "background.html",
 	"content_scripts":[
 		{
-			"matches":["http://*/*","https://*/*"],
+			"matches":["http://*/*"],
 			"js":["lib/jquery-1.7.1.min.js","js/content.js"],
 			"all_frames":true
 		}
