@@ -3,6 +3,9 @@
 // https://github.com/frankkohlhepp/fancy-settings
 // License: LGPL v2.1
 //
+//
+// TEXTAREA Type added. @soranchu
+//
 (function () {
     var settings,
         Bundle;
@@ -220,6 +223,79 @@
             this.element.addEvent("change", change);
             this.element.addEvent("keyup", change);
         }
+    });
+    
+//ADDED TEXTAREA Type @soranchu
+    Bundle.MultiText = new Class({
+        // label, text
+        // action -> change & keyup
+        "Extends": Bundle,
+        
+        "createDOM": function () {
+            this.bundle = new Element("div", {
+                "class": "setting bundle multitext"
+            });
+            
+            this.container = new Element("div", {
+                "class": "setting container multitext"
+            });
+            
+            this.element = new Element("textarea", {
+                "class": "setting element multitext"
+            });
+            
+            this.label = new Element("label", {
+                "class": "setting label multitext"
+            });
+        },
+        
+        "setupDOM": function () {
+            if (this.params.label !== undefined) {
+                this.label.set("html", this.params.label);
+                this.label.inject(this.container);
+                this.params.searchString += this.params.label + "•";
+            }
+            
+            if (this.params.text !== undefined) {
+                this.element.set("placeholder", this.params.text);
+                this.params.searchString += this.params.text + "•";
+            }
+
+            
+            this.element.inject(this.container);
+            this.container.inject(this.bundle);
+        },
+        
+        "addEvents": function () {
+            var change = (function (event) {
+                if (this.params.name !== undefined) {
+                    settings.set(this.params.name, this.get());
+                }
+                
+                this.fireEvent("action", this.get());
+            }).bind(this);
+            
+            this.element.addEvent("change", change);
+            this.element.addEvent("keyup", change);
+        },
+        
+        "get": function () {
+            return this.element.get("value").trim().split("\n");
+        },
+        
+        "set": function (value, noChangeEvent) {
+        	if( typeOf(value) == "array" ){
+        		this.element.set("value", value.join("\n"));
+        	}else{
+        		this.element.set("value", value);
+        	}
+            if (noChangeEvent !== true) {
+                this.element.fireEvent("change");
+            }
+            
+            return this;
+        }
+
     });
     
     Bundle.Checkbox = new Class({
@@ -625,6 +701,7 @@
                 "description": "Description",
                 "button": "Button",
                 "text": "Text",
+                "multiText":"MultiText", //ADDED TEXTAREA type @soranchu
                 "checkbox": "Checkbox",
                 "slider": "Slider",
                 "popupButton": "PopupButton",
