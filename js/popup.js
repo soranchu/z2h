@@ -3,7 +3,7 @@
 		chrome.tabs.create({url: "fancy-settings/source/index.html"});
 	});
 	
-	var bg = chrome.extension.getBackgroundPage();
+	var bg = chrome.extension.getBackgroundPage().background;
 	chrome.tabs.getSelected(null, function(tab){
 		var siteStatus = bg.tabStatus[tab.id] ? bg.tabStatus[tab.id].siteStatus : "ENABLE";
 		//var replaced =  bg.tabStatus[tab.id] ? bg.tabStatus[tab.id].replaced : 0;
@@ -16,7 +16,7 @@
 			$("#status_ph").text(bg.tabStatus[tab.id].status);
 			$("<div>").addClass("item selectable")
 				.append('<div class="arrow">')
-				.append('<div class="text">このページ('+match[2]+')での半角変換を無効にする</div>')
+				.append('<div class="text">このページでの半角変換を無効にする</div>')
 				.appendTo(".items")
 				.click(function(){
 					bg.addIgnorePage(match[2]);

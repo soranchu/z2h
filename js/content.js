@@ -1,12 +1,6 @@
-﻿
-var diff = 'Ａ'.charCodeAt(0) - 'A'.charCodeAt(0);
-
-function log(str){
-	console.log(str);
+﻿function log(str){
+	//console.log(str);
 }
-
-log("request isEnabled: " + location.host);
-log(window.parent);
 
 function makeRegExp(settings){
 	var pat = "";
@@ -40,6 +34,8 @@ chrome.extension.sendRequest({"cmd":"loaded", "url":location.href, "iframe":(sel
 	log("loaded response. siteStatus :" + siteStatus);
 	if( siteStatus == "ENABLE" && matcher != null ){
 		//TODO:except form input 
+		var diff = 'Ａ'.charCodeAt(0) - 'A'.charCodeAt(0);
+		
 		$("body *:not(iframe)").andSelf().contents().filter(function(){return this.nodeType==Node.TEXT_NODE;}).each(function(){
 			this.textContent = this.textContent.replace(matcher,function(matched){
 				replaced++;
