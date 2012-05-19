@@ -37,22 +37,19 @@ $(document).ready(function() {
 				    "https://www.https.ignore.com/pages.html?param=value&param2=value2",
 		];
 		
-		expect(urls.length + 4);
 		
 		var expected = [
-					    "",
-					    "www.ignore.com",
 					    "www.ignore.com/",
 					    "www.ignore.com/pages",
 					    "www.ignore.com/pages/hoge",
 					    "www.ignore.com/pages/hoge/",
 					    "www.ignore.com/pages.html",
-					    "www.ignore.com/pages.html",
-					    "www.ignore.com/pages.html",
-					    "www.ignore.com/pages.html",
 					    "www.https.ignore.org/",
 					    "www.https.ignore.com/pages.html",
 		];
+
+		expect(expected.length + 5);
+
 		localStorage["ignorePages"] = urls.join(",");
 		notEqual(localStorage["ignorePages"],undefined, "preconfig1");
 		
@@ -65,7 +62,8 @@ $(document).ready(function() {
 		var results = JSON.parse(resultjson);
 		notEqual(results, undefined, "stored setting parse");
 		
-		for( var i = 0; i < urls.length; ++i){
+		equal(results.length, expected.length, "result size check");
+		for( var i = 0; i < expected.length; ++i){
 			equal(results[i],expected[i], "import test #"+i);
 		}
 	});
@@ -88,22 +86,14 @@ $(document).ready(function() {
 				    "https://www.https.ignore.com/pages.html?param=value&param2=value2",
 		];
 		
-		expect(urls.length + 4);
 		
 		var expected = [
-					    "",
-					    "www.ignore.com",
-					    "www.ignore.com",
-					    "www.ignore.com",
-					    "www.ignore.com",
-					    "www.ignore.com",
-					    "www.ignore.com",
-					    "www.ignore.com",
-					    "www.ignore.com",
 					    "www.ignore.com",
 					    "www.https.ignore.org",
 					    "www.https.ignore.com",
 			];
+		expect(expected.length + 5);
+
 		localStorage["ignoreDomains"] = urls.join(",");
 		notEqual(localStorage["ignoreDomains"],undefined, "preconfig1");
 		
@@ -116,13 +106,45 @@ $(document).ready(function() {
 		var results = JSON.parse(resultjson);
 		notEqual(results, undefined, "stored setting parse");
 		
-		for( var i = 0; i < urls.length; ++i){
+		equal(results.length, expected.length, "result size check");
+		for( var i = 0; i < expected.length; ++i){
 			equal(results[i],expected[i], "import test #"+i);
 		}
 	});
 
-	test("second test within module", function() {
-		ok(true, "all pass");
+	test("translate pattern table", function() {
+		localStorage.clear();
+		var bg = Background();
+
+		bg.init();
+		var patjson = localStorage["store.settings.patternTable"];
+		notEqual(patjson, undefined, "get stored value");
+		
+		var pat = JSON.parse(patjson);
+		var expected = {
+			alpha : {
+				pat   : "\\uff21-\\uff3a\\uff41-\\uff5a",
+				chars : "ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ"
+			},
+			num : {
+				pat   : "\\uff10-\\uff19",
+				chars : "０１２３４５６７８９"
+			},
+			syms : {
+				pat   : "\\uff01-\\uff0f\\uff1a-\\uff20\\uff3b-\\uff40\\uff5b-\\uff5d",
+				chars : "！＂＃＄％＆＇（）＊＋，－．／：；＜＝＞？＠［＼］＾＿｀｛｜｝"
+			},
+			tilde : {
+				pat   : "\\uff5e-\\uff5e",
+				chars : "～"
+			},
+			space : {
+				pat   : "\\u3000-\\u3000",
+				chars : "　"
+			},
+			_version: 2.2
+		};
+		deepEqual(pat,expected, "check pattern table");
 	});
 
 	module("Module B");

@@ -11,3 +11,11 @@
 .setting.element.button{
     margin-left: 24px;
 }
+
+.setting.container.multitext{
+	display:inline-block;
+}
+
+.setting.container.textareaButton{
+	text-align : right;
+}

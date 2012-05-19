@@ -1,6 +1,6 @@
 ﻿var Background = function(){
 	var log = function(str){
-		console.log(str);
+		//console.log(str);
 	};
 	
 	var tabStatus = {};
@@ -21,59 +21,64 @@
 		// import old localStorage settings
 		var pages = localStorage["ignorePages"];
 		var domains = localStorage["ignoreDomains"];
+
+		var ignorePages = settings.get("ignorePages");
+		var ignoreDomains = settings.get("ignoreDomains");
 	
 		var updated = false;
 		if( pages ){
 			pages = pages.split(/,(?=https?\:\/\/)/);
-			var ignorePages = settings.get("ignorePages");
 			for(var i = 0; i < pages.length; ++i ){
 				if( ! arrayContains(ignorePages, pages[i]) ){
 					ignorePages.push(pages[i]);
 					updated = true;
 				}
 			}
-			settings.set("ignorePages",ignorePages);
 		}
 		if( domains ){
 			domains = domains.split(/,(?=https?\:\/\/)/);
-			var ignoreDomains = settings.get("ignoreDomains");
 			for(var i = 0; i < domains.length; ++i ){
 				if( ! arrayContains(ignoreDomains, domains[i]) ){
 					ignoreDomains.push(domains[i]);
 					updated = true;
 				}
 			}
-			settings.set("ignoreDomains",ignoreDomains);
 		}
 		localStorage.removeItem("ignorePages");
 		localStorage.removeItem("ignoreDomains");
 		
 		//update ignore page/domain urls
 		var pat = settings.get("patternTable");
-		if( updated || ! pat || pat._version <= 2 ){
+		if( updated || ! pat || pat._version <= 2.1 ){
 			log("updating ignore settings");
+			
+			var newPages = [];
+			var newDomains = [];
 		
-			var ignorePages = settings.get("ignorePages");
 			for( var i = 0 ; i < ignorePages.length; ++ i){
-				var url = ignorePages[i];
-				var match = url.match(/((https?|file):\/\/)?(([^\/]+)(\/[^?#]*)?)/);
-				if( match && match.length > 4 ){
-					log("updating ignore page : " + ignorePages[i] + " -> " + match[3]);
-					ignorePages[i] = match[3];
+				var match = urlMatcher(ignorePages[i]);
+				if( match && match.page ){
+					var contains = arrayContains(newPages, match.page);
+					log("updating ignore page : " + ignorePages[i] + " -> " + match.page + contains?"(duplicated)":"");
+					if( !contains ){
+						newPages.push(match.page);
+					}
 				}
 			}
-			settings.set("ignorePages",ignorePages);
 		
-			var ignoreDomains = settings.get("ignoreDomains");
 			for( var i = 0 ; i < ignoreDomains.length; ++ i){
-				var url = ignoreDomains[i];
-				var match = url.match(/((https?|file):\/\/)?(([^\/]+)(\/[^?#]*)?)/);
-				if( match && match.length > 4 ){
-					log("updating ignore domain : " + ignoreDomains[i] + " -> " + match[4]);
-					ignoreDomains[i] = match[4];
+				var match = urlMatcher(ignoreDomains[i]);
+				if( match && match.domain ){
+					var contains = arrayContains(newDomains, match.domain);
+					log("updating ignore domain : " + ignoreDomains[i] + " -> " + match.domain + contains?"(duplicated)":"");
+					if( !contains ){
+						newDomains.push(match.domain);
+					}
 				}
 			}
-			settings.set("ignoreDomains",ignoreDomains);
+			
+			settings.set("ignorePages",newPages);
+			settings.set("ignoreDomains",newDomains);
 		}
 	};
 	
@@ -98,7 +103,7 @@
 			pat.tilde = makePattern([{from:'～',to:'～'}]);
 			pat.space = makePattern([{from:'　',to:'　'}]);
 		
-			pat._version = 2.1;
+			pat._version = 2.2;
 			
 			settings.set("patternTable", pat);
 		}
@@ -177,13 +182,13 @@
 	
 	var getSiteStatus = function(url){
 		var match = urlMatcher(url);
-		if( match && match.length > 3){
+		if( match ){
 			var ignorePages = settings.get("ignorePages");
-			if( arrayContains(ignorePages, match[2]) ){
+			if( arrayContains(ignorePages, match.page) ){
 				return "IGNORE_PAGE";
 			}
 			var ignoreDomains = settings.get("ignoreDomains");
-			if( arrayContains(ignoreDomains, match[3]) ){
+			if( arrayContains(ignoreDomains, match.domain) ){
 				return "IGNORE_DOMAIN";
 			}
 		}
@@ -191,7 +196,20 @@
 	};
 	
 	var urlMatcher = function(url){
-		return url && url.match(/(https?|file):\/\/(([^\/]+)\/[^?#]*)/);
+		if( !url )return;
+		var match = url.match(/^(.*:\/\/)?(([^\/]+)(\/[^?#]*)?)/);
+		if( match ){
+			var page = match[2];
+			if( page.indexOf("/") < 0 ){
+				page += "/";
+			}
+			return {
+				protocol : match[1],
+				page : page,
+				domain : match[3]
+			};
+		}
+		//return url && url.match(/(https?|file):\/\/(([^\/]+)\/[^?#]*)/);
 	};
 	
 	var onTabUpdated = function(tabId, changeInfo, tab){

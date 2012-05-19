@@ -245,12 +245,14 @@
             });
             
             if (this.params.withButton !== undefined ) {
+                this.buttonContainer = new Element("div", {
+                    "class": "setting container textareaButton"
+                });
 	            this.button = new Element("input", {
 	                "class": "setting element button",
 	                "type": "button"
 	            });
             }
-            
             
             this.label = new Element("label", {
                 "class": "setting label multitext"
@@ -275,13 +277,16 @@
             }
             this.element.inject(this.container);
             if (this.params.withButton !== undefined ) {
-                this.button.inject(this.container);
+                this.button.inject(this.buttonContainer);
+                this.buttonContainer.inject(this.container);
             }
             this.container.inject(this.bundle);
         },
         
         "addEvents": function () {
             var change = (function (event) {
+                this.fireEvent("validate", this.get());
+                
                 if (this.params.name !== undefined) {
                     settings.set(this.params.name, this.get());
                 }
