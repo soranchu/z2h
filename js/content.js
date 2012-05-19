@@ -1,5 +1,5 @@
-﻿function log(str){
-	//console.log(str);
+function log(str){
+	console.log(str);
 }
 
 function makeRegExp(settings){

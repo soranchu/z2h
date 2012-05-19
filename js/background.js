@@ -1,6 +1,6 @@
 ﻿var Background = function(){
-	this.log = function(str){
-		//console.log(str);
+	var log = function(str){
+		console.log(str);
 	};
 	
 	var tabStatus = {};
@@ -15,19 +15,21 @@
 	    "replace_sym": true,
 	    "replace_tilde": false
 	});
-
-	this.importOldSettings = function(){
+	
+	var importOldSettings = function(){
 		
 		// import old localStorage settings
 		var pages = localStorage["ignorePages"];
 		var domains = localStorage["ignoreDomains"];
 	
+		var updated = false;
 		if( pages ){
 			pages = pages.split(/,(?=https?\:\/\/)/);
 			var ignorePages = settings.get("ignorePages");
 			for(var i = 0; i < pages.length; ++i ){
 				if( ! arrayContains(ignorePages, pages[i]) ){
 					ignorePages.push(pages[i]);
+					updated = true;
 				}
 			}
 			settings.set("ignorePages",ignorePages);
@@ -38,6 +40,7 @@
 			for(var i = 0; i < domains.length; ++i ){
 				if( ! arrayContains(ignoreDomains, domains[i]) ){
 					ignoreDomains.push(domains[i]);
+					updated = true;
 				}
 			}
 			settings.set("ignoreDomains",ignoreDomains);
@@ -47,7 +50,7 @@
 		
 		//update ignore page/domain urls
 		var pat = settings.get("patternTable");
-		if( ! pat || pat._version <= 2 ){
+		if( updated || ! pat || pat._version <= 2 ){
 			log("updating ignore settings");
 		
 			var ignorePages = settings.get("ignorePages");
@@ -74,7 +77,8 @@
 		}
 	};
 	
-	this.arrayContains = function(arr, val){
+	var arrayContains = function(arr, val){
+		if( arr === undefined )return false;
 		for(var i = 0; i < arr.length; ++i){
 			if( val == arr[i] ){
 				return true;
@@ -83,9 +87,9 @@
 		return false;
 	};
 	
-	this.createTranslateTable = function(){
+	var createTranslateTable = function(){
 		var pat = settings.get("patternTable");
-		if( ! pat || pat._version <= 2 ){
+		if( ! pat || pat._version <= 2.1 ){
 			
 			pat = {};
 			pat.alpha =  makePattern([{from:'Ａ',to:'Ｚ'},{from:'ａ',to:'ｚ'}]);
@@ -100,7 +104,7 @@
 		}
 	};
 	
-	this.makePattern = function(ranges){
+	var makePattern = function(ranges){
 		var pat = [];
 		var str = "";
 	
@@ -122,7 +126,7 @@
 		return {"pat":pat.join(""),"chars":str};
 	};
 	
-	this.getManifest = function(cb){
+	var getManifest = function(cb){
 		var xhr = new XMLHttpRequest();
 		xhr.open('GET', "manifest.json");
 		xhr.onreadystatechange = function() {
@@ -134,7 +138,7 @@
 		xhr.send();
 	};
 	
-	this.setIconStatus = function(tabid){
+	var setIconStatus = function(tabid){
 		var enabled = true;
 		var visible = false;
 		
@@ -171,7 +175,7 @@
 		
 	};
 	
-	this.getSiteStatus = function(url){
+	var getSiteStatus = function(url){
 		var match = urlMatcher(url);
 		if( match && match.length > 3){
 			var ignorePages = settings.get("ignorePages");
@@ -186,21 +190,21 @@
 		return "ENABLE";
 	};
 	
-	this.urlMatcher = function(url){
+	var urlMatcher = function(url){
 		return url && url.match(/(https?|file):\/\/(([^\/]+)\/[^?#]*)/);
 	};
 	
-	this.onTabUpdated = function(tabId, changeInfo, tab){
+	var onTabUpdated = function(tabId, changeInfo, tab){
 		log("tab updated : tabid:" +tabId + " info:status:" + changeInfo.status + " info.url:" +changeInfo.url );
 		setIconStatus(tabId);
 	};
-	this.onRequest = function(request, sender, sendResponse) {
+	var onRequest = function(request, sender, sendResponse) {
 		var res = {};
 		
-		log("[bg] onRequest cmd:" + request.cmd + " sender:" + sender.tab.id + " url:" + request.url + " iframe:"+request.iframe );
 		var iframe = request.iframe;
 		
 		if( request.cmd === "loaded" ){
+			log("[bg] onRequest cmd:" + request.cmd + " sender:" + sender.tab.id + " url:" + request.url + " iframe:"+request.iframe );
 			
 			res.siteStatus = getSiteStatus(request.url);
 			res.settings = settings.toObject();
@@ -214,6 +218,7 @@
 				setIconStatus(sender.tab.id);
 			}
 		}else if( request.cmd === "update" ){
+			log("[bg] onRequest cmd:" + request.cmd + " sender:" + sender.tab.id + " relpaced:" + request.replaced + " iframe:"+request.iframe );
 	
 			if( !iframe ){
 				tabStatus[sender.tab.id].replaced = request.replaced;
@@ -272,7 +277,6 @@
 			chrome.tabs.onUpdated.addListener(onTabUpdated);
 			chrome.extension.onRequest.addListener(onRequest);
 		},
-		
 		tabStatus : tabStatus
 	};
 };
