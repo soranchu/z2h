@@ -45,6 +45,9 @@ this.i18n = {
     },
 	"ignore_domains": {
         "ja": "ドメイン指定"
+    },
+    "apply":{
+    	"ja" : "適用"
     }
 
 };

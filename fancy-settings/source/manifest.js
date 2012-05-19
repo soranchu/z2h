@@ -57,7 +57,8 @@ this.manifest = {
             "name": "ignorePages",
             "type": "multiText",
             "text": "www.example.com/path/to/ignore",
-            "label": i18n.get("ignore_pages")
+            "label": i18n.get("ignore_pages"),
+            "withButton" : i18n.get("apply")
         },
         {
             "tab": i18n.get("details"),
@@ -65,7 +66,8 @@ this.manifest = {
             "name": "ignoreDomains",
             "type": "multiText",
             "text": "www.example.com",
-            "label": i18n.get("ignore_domains")
+            "label": i18n.get("ignore_domains"),
+            "withButton" : i18n.get("apply")
         }
     ]
 };

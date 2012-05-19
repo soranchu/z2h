@@ -244,6 +244,14 @@
                 "class": "setting element multitext"
             });
             
+            if (this.params.withButton !== undefined ) {
+	            this.button = new Element("input", {
+	                "class": "setting element button",
+	                "type": "button"
+	            });
+            }
+            
+            
             this.label = new Element("label", {
                 "class": "setting label multitext"
             });
@@ -261,8 +269,14 @@
                 this.params.searchString += this.params.text + "•";
             }
 
-            
+            if (this.params.withButton !== undefined ) {
+                this.button.set("value", this.params.withButton);
+                this.button.set("disabled", "disabled");
+            }
             this.element.inject(this.container);
+            if (this.params.withButton !== undefined ) {
+                this.button.inject(this.container);
+            }
             this.container.inject(this.bundle);
         },
         
@@ -273,10 +287,23 @@
                 }
                 
                 this.fireEvent("action", this.get());
+                if (this.params.withButton !== undefined ) {
+                	this.button.set("disabled","disabled");
+                }
             }).bind(this);
             
-            this.element.addEvent("change", change);
-            this.element.addEvent("keyup", change);
+            var enable = (function (event) {
+            	this.button.erase("disabled");
+            }).bind(this);
+            
+            if (this.params.withButton !== undefined ) {
+            	this.button.addEvent("click", change);
+	            this.element.addEvent("change", enable);
+	            this.element.addEvent("keyup", enable);
+            }else{
+	            this.element.addEvent("change", change);
+	            this.element.addEvent("keyup", change);
+            }
         },
         
         "get": function () {
