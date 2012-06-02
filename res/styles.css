@@ -65,15 +65,17 @@ ul{
 	font-size: x-small;
 }
 
-.setting{
+.optionbutton{
 	float:right;
 	padding: 6px;
 	color: #000;
 	font-size: x-small;
     color: #FDD;
 	text-decoration: underline;
+	cursor:pointer;
+	-webkit-user-select: none;
 }
-.setting:hover{
+.optionbutton:hover{
     background: -webkit-linear-gradient(top, #B8002E 0%, #C03 100%);
 	
 }

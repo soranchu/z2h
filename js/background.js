@@ -1,4 +1,5 @@
-﻿var Background = function(){
+﻿"use strict";
+var Background = function(){
 	var log = function(str){
 		//console.log(str);
 	};
@@ -8,13 +9,17 @@
 	var settings = new Store("settings", {
 	    "ignorePages": [],
 	    "ignoreDomains": [],
+	    "highlightPages": [],
 	    "patternTable":null,
 	    "replace_alpha": true,
 	    "replace_num": true,
 	    "replace_space": true,
 	    "replace_sym": true,
-	    "replace_tilde": false
+	    "replace_sym_options" : null
+//	    "replace_tilde": false
 	});
+	
+	var customSymPattern = "";
 	
 	var importOldSettings = function(){
 		
@@ -80,6 +85,25 @@
 			settings.set("ignorePages",newPages);
 			settings.set("ignoreDomains",newDomains);
 		}
+		var showUpdatedPage = false;
+		var replaceSym = localStorage.getItem("store.settings.replace_sym") == "true";
+		var replaceTilde = localStorage.getItem("store.settings.replace_tilde") == "true";
+		var symOpts = settings.get("replaceSymOptions");
+		if( symOpts == null ){
+			showUpdatedPage = true;
+			symOpts = [];
+			for( var i = 0;i < 32; ++i){
+				if( i == 31){
+					symOpts[i] = replaceTilde;
+				}else{
+					symOpts[i] = replaceSym;
+				}
+			}
+			settings.set("replaceSymOptions", symOpts);
+		}
+		localStorage.removeItem("store.settings.replace_tilde");
+		
+		return showUpdatedPage;
 	};
 	
 	var arrayContains = function(arr, val){
@@ -94,19 +118,58 @@
 	
 	var createTranslateTable = function(){
 		var pat = settings.get("patternTable");
-		if( ! pat || pat._version <= 2.1 ){
+		if( ! pat || pat._version <= 2.3 ){
 			
 			pat = {};
 			pat.alpha =  makePattern([{from:'Ａ',to:'Ｚ'},{from:'ａ',to:'ｚ'}]);
 			pat.num = makePattern([{from:'０',to:'９'}]);
-			pat.syms = makePattern([{from:'！',to:'／'},{from:'：',to:'＠'},{from:'［',to:'｀'},{from:'｛',to:'｝'}]);
-			pat.tilde = makePattern([{from:'～',to:'～'}]);
+			pat.syms = makePattern([{from:'！',to:'／'},{from:'：',to:'＠'},{from:'［',to:'｀'},{from:'｛',to:'～'}]);
+			//pat.syms_custom = pat.syms;
+			//pat.tilde = makePattern([{from:'～',to:'～'}]);
 			pat.space = makePattern([{from:'　',to:'　'}]);
 		
-			pat._version = 2.2;
+			pat._version = 2.3;
 			
 			settings.set("patternTable", pat);
 		}
+	};
+	
+	var updateCustomSymPattern = function(symValues){
+		var symChars = settings.get("patternTable").syms.chars;
+		if( !symValues ){
+			customSymPattern = settings.get("patternTable").syms;
+			return;
+		}
+		
+		var pat = [];
+		var last = null;
+		var char,lastChar = null;
+		for( var i=0;i<symValues.length;++i){
+			char = symChars[i];
+			if( symValues[i] ){
+				if( last != null && lastChar.charCodeAt(0)+1 == char.charCodeAt(0)){
+					last.to = char;
+				}else{
+					if( last != null ){
+						pat.push(last);
+					}
+					last = {};
+					last.from = char;
+				}
+			}else{
+				if( last != null ){
+					pat.push(last);
+					last = null;
+				}
+			}
+			lastChar = char;
+		}
+		if( last != null ){
+			pat.push(last);
+		}
+		customSymPattern = makePattern(pat);
+		//log(pat);
+		log("custom sym pat:" + customSymPattern.pat + "chars:"+customSymPattern.chars);
 	};
 	
 	var makePattern = function(ranges){
@@ -116,21 +179,51 @@
 		for(var r = 0;r < ranges.length; ++r){
 			var range = ranges[r];
 	
-			for( var i = range.from.charCodeAt(0); i <= range.to.charCodeAt(0); ++i){
-				str += String.fromCharCode(i);
+			if( range.to === undefined ){
+				str += range.from[0];
+			}else{
+				for( var i = range.from.charCodeAt(0); i <= range.to.charCodeAt(0); ++i){
+					str += String.fromCharCode(i);
+				}
 			}
-			
 			var from = "000" + range.from.charCodeAt(0).toString(16);
 			from = from.substr(from.length-4);
-			var to = "000" + range.to.charCodeAt(0).toString(16);
-			to = to.substr(to.length-4);
 			
-			pat.push("\\u"+from+"-\\u"+to);
+			if( range.to === undefined || range.from === range.to ){
+				pat.push("\\u"+from);
+			}else{
+				var to = "000" + range.to.charCodeAt(0).toString(16);
+				to = to.substr(to.length-4);
+				
+				pat.push("\\u"+from+"-\\u"+to);
+			}
 		}
 	
 		return {"pat":pat.join(""),"chars":str};
 	};
 	
+	var getPattern = function(){
+		var pat = "";
+		var table = settings.get("patternTable");
+		if( settings.get("replace_alpha") ){
+			pat += table.alpha.pat;
+		}
+		if( settings.get("replace_num") ){
+			pat += table.num.pat;
+		}
+		if( settings.get("replace_sym") ){
+			pat += customSymPattern.pat;
+		}
+		/*
+		if( settings.replace_tilde ){
+			pat += settings.patternTable.tilde.pat;
+		}*/
+		if( settings.get("replace_space") ){
+			pat += table.space.pat;
+		}
+		return pat;
+	};
+
 	var getManifest = function(cb){
 		var xhr = new XMLHttpRequest();
 		xhr.open('GET', "manifest.json");
@@ -148,7 +241,11 @@
 		var visible = false;
 		
 		if( tabStatus[tabid] ){
-			if( tabStatus[tabid].siteStatus !== "ENABLE" ){
+			if( tabStatus[tabid].siteStatus === "HIGHLIGHT" ){
+				tabStatus[tabid].status = "全角英数を強調表示中(" + tabStatus[tabid].replaced+"文字ありました)";
+				enabled = true;
+				visible = true;
+			}else if( tabStatus[tabid].siteStatus !== "ENABLE" ){
 				tabStatus[tabid].status = "さよなら全角英数は無効になっています";
 				enabled = false;
 				visible = true;
@@ -183,6 +280,10 @@
 	var getSiteStatus = function(url){
 		var match = urlMatcher(url);
 		if( match ){
+			var highlights = settings.get("highlightPages");
+			if( arrayContains(highlights, match.page) ){
+				return "HIGHLIGHT";
+			}
 			var ignorePages = settings.get("ignorePages");
 			if( arrayContains(ignorePages, match.page) ){
 				return "IGNORE_PAGE";
@@ -214,6 +315,9 @@
 	
 	var onTabUpdated = function(tabId, changeInfo, tab){
 		log("tab updated : tabid:" +tabId + " info:status:" + changeInfo.status + " info.url:" +changeInfo.url );
+		if( changeInfo.url && changeInfo.url.indexOf("https") == 0 ){
+			delete tabStatus[tabId];
+		}
 		setIconStatus(tabId);
 	};
 	var onRequest = function(request, sender, sendResponse) {
@@ -225,7 +329,7 @@
 			log("[bg] onRequest cmd:" + request.cmd + " sender:" + sender.tab.id + " url:" + request.url + " iframe:"+request.iframe );
 			
 			res.siteStatus = getSiteStatus(request.url);
-			res.settings = settings.toObject();
+			res.pattern = getPattern();
 			
 			if (!iframe){
 				tabStatus[sender.tab.id] = {
@@ -237,11 +341,15 @@
 			}
 		}else if( request.cmd === "update" ){
 			log("[bg] onRequest cmd:" + request.cmd + " sender:" + sender.tab.id + " relpaced:" + request.replaced + " iframe:"+request.iframe );
-	
-			if( !iframe ){
-				tabStatus[sender.tab.id].replaced = request.replaced;
+			
+			if( ! tabStatus[sender.tab.id] ){
+				log("unknown tab :" + sender.tab.id);
 			}else{
-				tabStatus[sender.tab.id].replaced += request.replaced;
+				if( !iframe ){
+					tabStatus[sender.tab.id].replaced = request.replaced;
+				}else{
+					tabStatus[sender.tab.id].replaced += request.replaced;
+				}
 			}
 			setIconStatus(sender.tab.id);
 		}
@@ -249,6 +357,21 @@
 	};
 	
 	return {
+		setHighlight : function(url, enable){
+			
+			var highlight = settings.get("highlightPages");
+			if( enable && !arrayContains(highlight, url) ){
+				highlight.push(url);
+			}else if( ! enable ){
+				for( var i = 0; i < highlight.length; ++i){
+					if( highlight[i] === url ){
+						highlight.splice(i,1);
+						break;
+					}
+				}
+			}
+			settings.set("highlightPages",highlight);
+		},
 		addIgnorePage : function(url){
 			var ignorePages = settings.get("ignorePages");
 			if( !arrayContains(ignorePages, url) ){
@@ -288,13 +411,27 @@
 		urlMatcher : urlMatcher,
 		
 		init : function(){
-			importOldSettings();
+			var updated = importOldSettings();
 			createTranslateTable();
-			
+			updateCustomSymPattern();
 			
 			chrome.tabs.onUpdated.addListener(onTabUpdated);
 			chrome.extension.onRequest.addListener(onRequest);
+			if( updated ){
+				chrome.tabs.create({url: "fancy-settings/source/index.html"});
+			}
 		},
-		tabStatus : tabStatus
+		tabStatus : tabStatus,
+		
+		getSyms : function(){
+			return settings.get("patternTable").syms.chars;
+		},
+		updateSettings : function(symValues){
+			updateCustomSymPattern(symValues);
+		},
+		getCustomSymPattern : function(){
+			return customSymPattern;
+		},
+		enableUnitTest : false
 	};
 };

@@ -383,6 +383,97 @@
         }
     });
     
+    Bundle.CheckboxTable = new Class({
+        // label
+        // action -> change
+        "Extends": Bundle,
+        
+        "createDOM": function () {
+            this.bundle = new Element("div", {
+                "class": "setting bundle checkboxTable"
+            });
+            
+            this.container = new Element("div", {
+                "class": "setting container checkboxTable"
+            });
+            
+            this.elements = [];
+            this.labels = [];
+            this.items = [];
+            this.rows = this.params.rows || 1;
+            this.cols = this.params.cols || 1;
+            this.count = this.params.count || 1;
+            var item,elm, label;
+            for(var i = 0; i < this.count;++i){
+                item = new Element("div", {
+                    "class": "setting inline_container checkbox"
+                });
+                this.items.push(item);
+	            elm = new Element("input", {
+	                "id": String.uniqueID()+"_"+i,
+	                "class": "setting element checkbox",
+	                "type": "checkbox",
+	                "value": "true"
+	            });
+	            this.elements.push(elm);
+	            label = new Element("label", {
+	                "class": "setting label checkbox",
+	                "for": elm.get("id")
+	            });
+	            this.labels.push(label);
+            }
+        },
+        
+        "setupDOM": function () {
+        	for(var i=0;i< this.count;++i){
+                this.elements[i].inject(this.items[i]);
+                this.labels[i].set("html", this.params.label[i]);
+                this.labels[i].inject(this.items[i]);
+                this.params.searchString += this.params.label[i] + "•";
+                this.items[i].inject(this.container);
+        	}
+            this.container.inject(this.bundle);
+            
+        },
+        "addEvents": function () {
+        	for(var i =0;i<this.count;++i){
+	            this.elements[i].addEvent("change", (function (event) {
+	                if (this.params.name !== undefined) {
+	                    settings.set(this.params.name, this.get());
+	                }
+	                
+	                this.fireEvent("action", this.get());
+	            }).bind(this));
+        	}
+        },
+        
+        
+        "get": function () {
+        	var ret = [];
+        	for(var i = 0; i< this.count;++i){
+        		ret.push(this.elements[i].get("checked"));
+        	}
+            return ret;
+        },
+        
+        "set": function (value, noChangeEvent) {
+        	if( typeOf(value) === "array" ){
+	        	for(var i = 0; i < this.count;++i){
+	        		this.elements[i].set("checked", value[i]);
+	        	}
+        	}else{
+	        	for(var i = 0; i < this.count;++i){
+	        		this.elements[i].set("checked", value);
+	        	}
+        	}
+            if (noChangeEvent !== true) {
+                this.element.fireEvent("change");
+            }
+            
+            return this;
+        }
+    });
+    
     Bundle.Slider = new Class({
         // label, max, min, step, display, displayModifier
         // action -> change
@@ -735,6 +826,7 @@
                 "text": "Text",
                 "multiText":"MultiText", //ADDED TEXTAREA type @soranchu
                 "checkbox": "Checkbox",
+                "checkboxTable" : "CheckboxTable",
                 "slider": "Slider",
                 "popupButton": "PopupButton",
                 "listBox": "ListBox",

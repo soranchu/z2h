@@ -1,0 +1,9 @@
+@CHARSET "UTF-8";
+
+._z2h_highlight{
+	background : rgba(255,30,0,0.4) !important;
+	margin  : 0px !important;
+	padding : 0px !important;
+	border-radius : 2px !important;
+	display : inline !important;
+}

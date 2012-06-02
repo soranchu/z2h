@@ -25,6 +25,38 @@ window.addEvent("domready", function () {
     		}
     		settings.manifest.ignoreDomains.set(valdiated, true);
     	});
+    	var syms = bg.getSyms();
+    	var replaceSymOptions = settings.create({
+            "tab": i18n.get("details"),
+            "group": i18n.get("replace"),
+            "name": "replaceSymOptions",
+            "type": "checkboxTable",
+            "count":syms.length,
+            "label": syms
+    	});
+    	settings.manifest.replaceSymOptions = replaceSymOptions;
+    	if(!settings.manifest.replace_sym.get()){
+			settings.manifest.replaceSymOptions.container.addClass("disabled");
+    		settings.manifest.replaceSymOptions.elements.each(function(elm){
+    			elm.set("disabled","disabled");
+    		});
+    	}
+    	settings.manifest.replace_sym.addEvent("action", function(checked){
+    		if( checked ){
+    			settings.manifest.replaceSymOptions.container.removeClass("disabled");
+   	    		settings.manifest.replaceSymOptions.elements.each(function(elm){
+   	    			elm.erase("disabled");
+   	    		});
+    		}else{
+    			settings.manifest.replaceSymOptions.container.addClass("disabled");
+   	    		settings.manifest.replaceSymOptions.elements.each(function(elm){
+   	    			elm.set("disabled","disabled");
+   	    		});
+    		}
+    	});
+    	settings.manifest.replaceSymOptions.addEvent("action", function(values){
+    		bg.updateSettings(this.get());
+    	});
         /*settings.manifest.myButton.addEvent("action", function () {
             alert("You clicked me!");
         });

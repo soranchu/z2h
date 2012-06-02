@@ -15,7 +15,22 @@
 .setting.container.multitext{
 	display:inline-block;
 }
+.setting.container.checkboxTable{
+	margin-left:32px;
+}
+
+.setting.inline_container.checkbox{
+	display:inline-block;
+	width : 64px;
+}
 
 .setting.container.textareaButton{
 	text-align : right;
+}
+
+.hidden{
+	display : none;
+}
+.disabled{
+	color : graytext;
 }

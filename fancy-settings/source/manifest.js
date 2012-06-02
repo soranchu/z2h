@@ -31,19 +31,20 @@ this.manifest = {
             "type": "checkbox",
             "label": i18n.get("replace_space")
         },
-        {
-            "tab": i18n.get("details"),
-            "group": i18n.get("replace"),
-            "name": "replace_sym",
-            "type": "checkbox",
-            "label": i18n.get("replace_sym")
-        },
+        /*
         {
             "tab": i18n.get("details"),
             "group": i18n.get("replace"),
             "name": "replace_tilde",
             "type": "checkbox",
             "label": i18n.get("replace_tilde")
+        },*/
+        {
+            "tab": i18n.get("details"),
+            "group": i18n.get("replace"),
+            "name": "replace_sym",
+            "type": "checkbox",
+            "label": i18n.get("replace_sym")
         },
         {
             "tab": i18n.get("details"),

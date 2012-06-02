@@ -26,7 +26,13 @@ this.i18n = {
         "ja": "全角数字(０～９)を半角に変換する"
     },
 	"replace_sym": {
-        "ja": "全角記号(＊＃％＄など)を半角に変換する"
+        "ja": "以下の全角記号を半角に変換する"
+    },
+	"open_replace_sym_option": {
+        "ja": "詳細を開く"
+    },
+	"close_replace_sym_option": {
+        "ja": "詳細を閉じる"
     },
 	"replace_tilde": {
         "ja": "全角チルダ(～)を半角に変換する"
