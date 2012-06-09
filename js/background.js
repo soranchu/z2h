@@ -15,7 +15,7 @@ var Background = function(){
 	    "replace_num": true,
 	    "replace_space": true,
 	    "replace_sym": true,
-	    "replace_sym_options" : null
+	    "replaceSymOptions" : null
 //	    "replace_tilde": false
 	});
 	
@@ -137,8 +137,9 @@ var Background = function(){
 	var updateCustomSymPattern = function(symValues){
 		var symChars = settings.get("patternTable").syms.chars;
 		if( !symValues ){
-			customSymPattern = settings.get("patternTable").syms;
-			return;
+			//customSymPattern = settings.get("patternTable").syms;
+			//return;
+			symValues = settings.get("replaceSymOptions");
 		}
 		
 		var pat = [];

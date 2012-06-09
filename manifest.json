@@ -1,6 +1,6 @@
 ﻿{
 	"name": "goodbye \"Zenkaku\" - さよなら全角英数",
-	"version": "1.1",
+	"version": "1.1.1",
 	"description": "ページ内のすべての全角英数文字を半角に置換します。あの電話会社のプレスリリースも、あの新聞社のニュースサイトも、キレることなく快適に閲覧できるでしょう。",
 	"page_action": {
 		"default_icon": "res/icon_19_gray.png",
