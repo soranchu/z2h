@@ -34,3 +34,7 @@
 .disabled{
 	color : graytext;
 }
+
+span.beta{
+	color:red;
+}

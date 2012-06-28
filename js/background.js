@@ -15,7 +15,10 @@ var Background = function(){
 	    "replace_num": true,
 	    "replace_space": true,
 	    "replace_sym": true,
-	    "replaceSymOptions" : null
+	    "replaceSymOptions" : null,
+	    "supportAjax" : false,
+	    "supportHttps" : false,
+	    "keepHeadingMBSpace" : false
 //	    "replace_tilde": false
 	});
 	
@@ -103,6 +106,12 @@ var Background = function(){
 		}
 		localStorage.removeItem("store.settings.replace_tilde");
 		
+		var prevVersion = localStorage.getItem("__version");
+		if( ! prevVersion || parseFloat(prevVersion) <= 2.3 ){
+			localStorage.setItem("__version", 2.4);
+			showUpdatedPage = true;
+		}
+		
 		return showUpdatedPage;
 	};
 	
@@ -117,10 +126,10 @@ var Background = function(){
 	};
 	
 	var createTranslateTable = function(){
-		var pat = settings.get("patternTable");
-		if( ! pat || pat._version <= 2.3 ){
+		//var pat = settings.get("patternTable");
+		//if( ! pat || pat._version <= 2.3 ){
 			
-			pat = {};
+			var pat = {};
 			pat.alpha =  makePattern([{from:'Ａ',to:'Ｚ'},{from:'ａ',to:'ｚ'}]);
 			pat.num = makePattern([{from:'０',to:'９'}]);
 			pat.syms = makePattern([{from:'！',to:'／'},{from:'：',to:'＠'},{from:'［',to:'｀'},{from:'｛',to:'～'}]);
@@ -128,10 +137,10 @@ var Background = function(){
 			//pat.tilde = makePattern([{from:'～',to:'～'}]);
 			pat.space = makePattern([{from:'　',to:'　'}]);
 		
-			pat._version = 2.3;
+			pat._version = 2.4;
 			
 			settings.set("patternTable", pat);
-		}
+		//}
 	};
 	
 	var updateCustomSymPattern = function(symValues){
@@ -243,7 +252,11 @@ var Background = function(){
 		
 		if( tabStatus[tabid] ){
 			if( tabStatus[tabid].siteStatus === "HIGHLIGHT" ){
-				tabStatus[tabid].status = "全角英数を強調表示中(" + tabStatus[tabid].replaced+"文字ありました)";
+				if( tabStatus[tabid].appended ){
+					tabStatus[tabid].status = "全角英数を強調表示中(合計" + tabStatus[tabid].replaced+"文字変換しました)";
+				}else{
+					tabStatus[tabid].status = "全角英数を強調表示中(" + tabStatus[tabid].replaced+"文字ありました)";
+				}
 				enabled = true;
 				visible = true;
 			}else if( tabStatus[tabid].siteStatus !== "ENABLE" ){
@@ -251,7 +264,11 @@ var Background = function(){
 				enabled = false;
 				visible = true;
 			}else if( tabStatus[tabid].replaced > 0 ){
-				tabStatus[tabid].status = ""+tabStatus[tabid].replaced+"文字の全角英数を半角に置換しました";
+				if( tabStatus[tabid].appended ){
+					tabStatus[tabid].status = "合計"+tabStatus[tabid].replaced+"文字の全角英数を半角に置換しました";
+				}else{
+					tabStatus[tabid].status = ""+tabStatus[tabid].replaced+"文字の全角英数を半角に置換しました";
+				}
 				enabled = true;
 				visible = true;
 			}else{
@@ -281,6 +298,9 @@ var Background = function(){
 	var getSiteStatus = function(url){
 		var match = urlMatcher(url);
 		if( match ){
+			if( !settings.get("supportHttps") && match.protocol == "https://" ){
+				return "DISABLE";
+			}
 			var highlights = settings.get("highlightPages");
 			if( arrayContains(highlights, match.page) ){
 				return "HIGHLIGHT";
@@ -316,28 +336,41 @@ var Background = function(){
 	
 	var onTabUpdated = function(tabId, changeInfo, tab){
 		log("tab updated : tabid:" +tabId + " info:status:" + changeInfo.status + " info.url:" +changeInfo.url );
-		if( changeInfo.url && changeInfo.url.indexOf("https") == 0 ){
+		if( changeInfo.url && ( 
+				changeInfo.url.indexOf("http") != 0 
+				|| (!settings.get("supportHttps") && changeInfo.url.indexOf("https") == 0) ) ){
 			delete tabStatus[tabId];
 		}
 		setIconStatus(tabId);
+	};
+	var onTabClosed = function(tabId){
+		delete tabStatus[tabId];
 	};
 	var onRequest = function(request, sender, sendResponse) {
 		var res = {};
 		
 		var iframe = request.iframe;
+		var append = request.append;
 		
 		if( request.cmd === "loaded" ){
 			log("[bg] onRequest cmd:" + request.cmd + " sender:" + sender.tab.id + " url:" + request.url + " iframe:"+request.iframe );
 			
 			res.siteStatus = getSiteStatus(request.url);
 			res.pattern = getPattern();
+			res.supportAjax = settings.get("supportAjax");
+			res.keepHeadingMBSpace = settings.get("keepHeadingMBSpace");
 			
-			if (!iframe){
-				tabStatus[sender.tab.id] = {
-						"siteStatus":res.siteStatus,
-						"replaced":0,
-						"status":""
-				};
+			if (!iframe ){
+				if( res.siteStatus != "DISABLE" ){
+					tabStatus[sender.tab.id] = {
+							"siteStatus":res.siteStatus,
+							"replaced":0,
+							"status":"",
+							"appended":false
+					};
+				}else{
+					delete tabStatus[sender.tab.id];
+				}
 				setIconStatus(sender.tab.id);
 			}
 		}else if( request.cmd === "update" ){
@@ -346,10 +379,11 @@ var Background = function(){
 			if( ! tabStatus[sender.tab.id] ){
 				log("unknown tab :" + sender.tab.id);
 			}else{
-				if( !iframe ){
+				if( !iframe && !append ){
 					tabStatus[sender.tab.id].replaced = request.replaced;
 				}else{
 					tabStatus[sender.tab.id].replaced += request.replaced;
+					tabStatus[sender.tab.id].appended |= append;
 				}
 			}
 			setIconStatus(sender.tab.id);
@@ -417,6 +451,7 @@ var Background = function(){
 			updateCustomSymPattern();
 			
 			chrome.tabs.onUpdated.addListener(onTabUpdated);
+			chrome.tabs.onRemoved.addListener(onTabClosed);
 			chrome.extension.onRequest.addListener(onRequest);
 			if( updated ){
 				chrome.tabs.create({url: "fancy-settings/source/index.html"});

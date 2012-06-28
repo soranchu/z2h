@@ -12,6 +12,28 @@ this.manifest = {
         },
         {
             "tab": i18n.get("details"),
+            "group": i18n.get("about"),
+            "name": "updates",
+            "type": "description",
+            "text": i18n.get("updates_text")
+        },
+
+        {
+            "tab": i18n.get("details"),
+            "group": i18n.get("replace"),
+            "name": "supportHttps",
+            "type": "checkbox",
+            "label": i18n.get("support_https")
+        },
+        {
+            "tab": i18n.get("details"),
+            "group": i18n.get("replace"),
+            "name": "supportAjax",
+            "type": "checkbox",
+            "label": i18n.get("support_ajax")
+        },
+        {
+            "tab": i18n.get("details"),
             "group": i18n.get("replace"),
             "name": "replace_alpha",
             "type": "checkbox",
@@ -30,6 +52,13 @@ this.manifest = {
             "name": "replace_space",
             "type": "checkbox",
             "label": i18n.get("replace_space")
+        },
+        {
+            "tab": i18n.get("details"),
+            "group": i18n.get("replace"),
+            "name": "keepHeadingMBSpace",
+            "type": "checkbox",
+            "label": i18n.get("keep_heading_space")
         },
         /*
         {

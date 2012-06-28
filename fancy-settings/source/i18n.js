@@ -16,6 +16,9 @@ this.i18n = {
         "en": "This extension replaces multibyte alphabets, numerals and symbols with single-byte ones.",
         "ja": "この拡張機能は、ページ内のすべての全角英数文字を半角に置換します。あの電話会社のプレスリリースも、あの新聞社のニュースサイトも、キレることなく快適に閲覧できるでしょう。"
     },
+	"updates_text": {
+        "ja": "2012/6/29 httpsサイトとAjaxで動的に更新されるページでの変換に対応しました。"
+    },
 	"replace": {
         "ja": "変換の設定"
     },
@@ -39,6 +42,15 @@ this.i18n = {
     },
 	"replace_space": {
         "ja": "全角スペースを半角に変換する"
+    },
+	"keep_heading_space": {
+        "ja": "行頭の全角スペースは変換しない "
+    },
+	"support_ajax": {
+        "ja": "Ajaxによる動的な書き換えも対象にする "
+    },
+	"support_https": {
+        "ja": "httpsのサイトも対象にする "
     },
 	"ignore_settings": {
         "ja": "変換を行わないURL"
