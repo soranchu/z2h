@@ -81,7 +81,7 @@ var highlight = function(matcher, target, keepHeadingMBSpace){
 	return replaced;
 };
 chrome.extension.sendRequest({"cmd":"loaded", "url":location.href, "iframe":(self!==top)}, function(res){
-	if (siteStatus == "DISABLE" ){
+	if (res.siteStatus == "DISABLE" ){
 		log("disabled");
 		return;
 	}

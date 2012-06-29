@@ -1,0 +1,40 @@
+/*
+// Add your own style rules here, not in css/main.css
+// or css/setting.css for easy updating reasons.
+*/
+.setting.element.multitext{
+	display:block;
+    height: 120px;
+    margin-left: 24px;
+}
+
+.setting.element.button{
+    margin-left: 24px;
+}
+
+.setting.container.multitext{
+	display:inline-block;
+}
+.setting.container.checkboxTable{
+	margin-left:32px;
+}
+
+.setting.inline_container.checkbox{
+	display:inline-block;
+	width : 64px;
+}
+
+.setting.container.textareaButton{
+	text-align : right;
+}
+
+.hidden{
+	display : none;
+}
+.disabled{
+	color : graytext;
+}
+
+span.beta{
+	color:red;
+}

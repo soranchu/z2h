@@ -1,6 +1,6 @@
 ﻿$(function(){
 	$(".setting").click(function(){
-		chrome.tabs.create({url: "fancy-settings/source/index.html"});
+		chrome.tabs.create({url: "settings/index.html"});
 	});
 	
 	

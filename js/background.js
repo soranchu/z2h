@@ -1,5 +1,5 @@
-﻿"use strict";
-var Background = function(){
+﻿var background = (function(){
+	"use strict";
 	var log = function(str){
 		//console.log(str);
 	};
@@ -454,7 +454,7 @@ var Background = function(){
 			chrome.tabs.onRemoved.addListener(onTabClosed);
 			chrome.extension.onRequest.addListener(onRequest);
 			if( updated ){
-				chrome.tabs.create({url: "fancy-settings/source/index.html"});
+				chrome.tabs.create({url: "settings/index.html"});
 			}
 		},
 		tabStatus : tabStatus,
@@ -470,4 +470,5 @@ var Background = function(){
 		},
 		enableUnitTest : false
 	};
-};
+})();
+background.init();
