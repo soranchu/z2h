@@ -1,0 +1,3 @@
+[submodule "lib/fancy-settings"]
+	path = lib/fancy-settings
+	url = https://github.com/soranchu/fancy-settings.git
