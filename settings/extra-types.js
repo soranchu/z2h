@@ -58,13 +58,18 @@ this.extraTypes = {
         
         "addEvents": function () {
             var change = (function (event) {
-                this.fireEvent("validate", this.get());
-                
+                this.fireEvent("validate", [this.get(),(function(validated){
+                	this.set(validated, true);
+                    if (this.params.name !== undefined) {
+                        this.settings.set(this.params.name, validated);
+                    }
+                }).bind(this)]);
+                /*
                 if (this.params.name !== undefined) {
-                    settings.set(this.params.name, this.get());
+                    this.settings.set(this.params.name, this.get());
                 }
-                
                 this.fireEvent("action", this.get());
+                */
                 if (this.params.withButton !== undefined ) {
                 	this.button.set("disabled","disabled");
                 }
@@ -89,13 +94,17 @@ this.extraTypes = {
         },
         
         "set": function (value, noChangeEvent) {
-        	if( typeOf(value) == "array" ){
+        	if( typeOf(value) === "array"  || (typeOf(value)==="object" && value.constructor.name === "Array") ){
         		this.element.set("value", value.join("\n"));
         	}else{
         		this.element.set("value", value);
         	}
             if (noChangeEvent !== true) {
-                this.element.fireEvent("change");
+                if (this.params.withButton !== undefined ) {
+                	this.button.fireEvent("click");
+                }else{
+    	            this.element.fireEvent("change");
+                }
             }
             
             return this;
@@ -159,7 +168,7 @@ this.extraTypes = {
         	for(var i =0;i<this.count;++i){
 	            this.elements[i].addEvent("change", (function (event) {
 	                if (this.params.name !== undefined) {
-	                    settings.set(this.params.name, this.get());
+	                    this.settings.set(this.params.name, this.get());
 	                }
 	                
 	                this.fireEvent("action", this.get());
@@ -177,7 +186,7 @@ this.extraTypes = {
         },
         
         "set": function (value, noChangeEvent) {
-        	if( typeOf(value) === "array" ){
+        	if( typeOf(value) === "array" || (typeOf(value) === "object" && value.constructor.name === "Array") ){
 	        	for(var i = 0; i < this.count;++i){
 	        		this.elements[i].set("checked", value[i]);
 	        	}
@@ -187,7 +196,7 @@ this.extraTypes = {
 	        	}
         	}
             if (noChangeEvent !== true) {
-                this.element.fireEvent("change");
+                this.elements[0].fireEvent("change");
             }
             
             return this;

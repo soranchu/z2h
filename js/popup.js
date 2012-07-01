@@ -1,10 +1,9 @@
 ﻿$(function(){
-	$(".setting").click(function(){
-		chrome.tabs.create({url: "settings/index.html"});
-	});
-	
-	
 	var bg = chrome.extension.getBackgroundPage().background;
+	$(".setting").click(function(){
+		//chrome.tabs.create({url: "settings/index.html"});
+		bg.showOptionPage();
+	});
 	
 	if( bg.enableUnitTest ){
 		$('<span class="tests optionbutton">Tests</span>').prependTo(".footer").click(function(){

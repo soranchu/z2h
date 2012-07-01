@@ -21,6 +21,13 @@ this.manifest = {
         {
             "tab": i18n.get("details"),
             "group": i18n.get("replace"),
+            "name": "replace_about",
+            "type": "description",
+            "text": i18n.get("replace_about_text")
+        },
+        {
+            "tab": i18n.get("details"),
+            "group": i18n.get("replace"),
             "name": "supportHttps",
             "type": "checkbox",
             "label": i18n.get("support_https")

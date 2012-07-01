@@ -4,111 +4,64 @@
 		//console.log(str);
 	};
 	
-	var tabStatus = {};
-	
-	var settings = new Store("settings", {
+	var defaultOptions = {
 	    "ignorePages": [],
 	    "ignoreDomains": [],
 	    "highlightPages": [],
-	    "patternTable":null,
 	    "replace_alpha": true,
 	    "replace_num": true,
 	    "replace_space": true,
 	    "replace_sym": true,
-	    "replaceSymOptions" : null,
+	    "replaceSymOptions" : [
+	        true,true,true,true,true,true,true,true,
+	        true,true,true,true,true,true,true,true,
+	        true,true,true,true,true,true,true,true,
+	        true,true,true,true,true,true,true,false
+	    ],
 	    "supportAjax" : false,
 	    "supportHttps" : false,
 	    "keepHeadingMBSpace" : false
-//	    "replace_tilde": false
-	});
+	};
+	
+	var tabStatus = {};
+	
+	var settings = null;
+	
+	var patternTable = null;
 	
 	var customSymPattern = "";
+
+	var importFromLocalStorage = function(name){
+		var pat = localStorage.getItem("store.settings." + name);
+		if( pat != undefined ){
+			pat = JSON.parse(pat);
+			settings.set(name, pat);
+			localStorage.removeItem("store.settings." + name);
+		}
+	};
 	
 	var importOldSettings = function(){
 		
-		// import old localStorage settings
-		var pages = localStorage["ignorePages"];
-		var domains = localStorage["ignoreDomains"];
-
-		var ignorePages = settings.get("ignorePages");
-		var ignoreDomains = settings.get("ignoreDomains");
-	
-		var updated = false;
-		if( pages ){
-			pages = pages.split(/,(?=https?\:\/\/)/);
-			for(var i = 0; i < pages.length; ++i ){
-				if( ! arrayContains(ignorePages, pages[i]) ){
-					ignorePages.push(pages[i]);
-					updated = true;
-				}
-			}
-		}
-		if( domains ){
-			domains = domains.split(/,(?=https?\:\/\/)/);
-			for(var i = 0; i < domains.length; ++i ){
-				if( ! arrayContains(ignoreDomains, domains[i]) ){
-					ignoreDomains.push(domains[i]);
-					updated = true;
-				}
-			}
-		}
-		localStorage.removeItem("ignorePages");
-		localStorage.removeItem("ignoreDomains");
-		
-		//update ignore page/domain urls
-		var pat = settings.get("patternTable");
-		if( updated || ! pat || pat._version <= 2.1 ){
-			log("updating ignore settings");
-			
-			var newPages = [];
-			var newDomains = [];
-		
-			for( var i = 0 ; i < ignorePages.length; ++ i){
-				var match = urlMatcher(ignorePages[i]);
-				if( match && match.page ){
-					var contains = arrayContains(newPages, match.page);
-					log("updating ignore page : " + ignorePages[i] + " -> " + match.page + contains?"(duplicated)":"");
-					if( !contains ){
-						newPages.push(match.page);
-					}
-				}
-			}
-		
-			for( var i = 0 ; i < ignoreDomains.length; ++ i){
-				var match = urlMatcher(ignoreDomains[i]);
-				if( match && match.domain ){
-					var contains = arrayContains(newDomains, match.domain);
-					log("updating ignore domain : " + ignoreDomains[i] + " -> " + match.domain + contains?"(duplicated)":"");
-					if( !contains ){
-						newDomains.push(match.domain);
-					}
-				}
-			}
-			
-			settings.set("ignorePages",newPages);
-			settings.set("ignoreDomains",newDomains);
-		}
 		var showUpdatedPage = false;
-		var replaceSym = localStorage.getItem("store.settings.replace_sym") == "true";
-		var replaceTilde = localStorage.getItem("store.settings.replace_tilde") == "true";
-		var symOpts = settings.get("replaceSymOptions");
-		if( symOpts == null ){
-			showUpdatedPage = true;
-			symOpts = [];
-			for( var i = 0;i < 32; ++i){
-				if( i == 31){
-					symOpts[i] = replaceTilde;
-				}else{
-					symOpts[i] = replaceSym;
-				}
-			}
-			settings.set("replaceSymOptions", symOpts);
-		}
-		localStorage.removeItem("store.settings.replace_tilde");
 		
 		var prevVersion = localStorage.getItem("__version");
-		if( ! prevVersion || parseFloat(prevVersion) <= 2.3 ){
-			localStorage.setItem("__version", 2.4);
+		if( ! prevVersion || parseFloat(prevVersion) <= 2.4 ){
+			//update chrome.storage.sync from localStorage
+			importFromLocalStorage("highlightPages");
+			importFromLocalStorage("ignoreDomains");
+			importFromLocalStorage("ignorePages");
+			importFromLocalStorage("keepHeadingMBSpace");
+			importFromLocalStorage("replaceSymOptions");
+			importFromLocalStorage("replace_alpha");
+			importFromLocalStorage("replace_num");
+			importFromLocalStorage("replace_space");
+			importFromLocalStorage("replace_sym");
+			importFromLocalStorage("supportAjax");
+			importFromLocalStorage("supportHttps");
+			
+			localStorage.removeItem("store.settings.patternTable");
+			
+			localStorage.setItem("__version", 2.5);
 			showUpdatedPage = true;
 		}
 		
@@ -139,12 +92,12 @@
 		
 			pat._version = 2.4;
 			
-			settings.set("patternTable", pat);
+			patternTable = pat;
 		//}
 	};
 	
 	var updateCustomSymPattern = function(symValues){
-		var symChars = settings.get("patternTable").syms.chars;
+		var symChars = patternTable.syms.chars;
 		if( !symValues ){
 			//customSymPattern = settings.get("patternTable").syms;
 			//return;
@@ -214,7 +167,7 @@
 	
 	var getPattern = function(){
 		var pat = "";
-		var table = settings.get("patternTable");
+		var table = patternTable;
 		if( settings.get("replace_alpha") ){
 			pat += table.alpha.pat;
 		}
@@ -391,6 +344,30 @@
 		sendResponse(res);
 	};
 	
+	var showOptionPage = function(){
+		chrome.tabs.query({url:chrome.extension.getURL("settings/index.html")},function(tabs){
+			if( tabs && tabs.length > 0 ){
+				if( tabs.length > 1 ){
+					log("showOptionPage:found 2 or more option page tabs. close them.");
+					var closeTabIds = [];
+					for( var i = 0; i< tabs.length-1; ++i){
+						closeTabIds.push(tabs[i].id);
+					}
+					chrome.tabs.remove(closeTabIds);
+					chrome.tabs.reload(tabs[tabs.length-1].id);
+					chrome.tabs.update(tabs[tabs.length-1].id, {active:true});
+				}else{
+					log("showOptionPage:found an option page tab. activate it.");
+					chrome.tabs.update(tabs[0].id, {active:true});
+				}
+			}else{
+				log("showOptionPage:opening new option page tab.");
+				chrome.tabs.create({url: "settings/index.html"});
+			}
+		});
+
+	};
+	
 	return {
 		setHighlight : function(url, enable){
 			
@@ -446,21 +423,27 @@
 		urlMatcher : urlMatcher,
 		
 		init : function(){
-			var updated = importOldSettings();
-			createTranslateTable();
-			updateCustomSymPattern();
-			
-			chrome.tabs.onUpdated.addListener(onTabUpdated);
-			chrome.tabs.onRemoved.addListener(onTabClosed);
-			chrome.extension.onRequest.addListener(onRequest);
-			if( updated ){
-				chrome.tabs.create({url: "settings/index.html"});
-			}
+			settings = new Store("settings", defaultOptions, function(){
+				var updated = importOldSettings();
+				createTranslateTable();
+				updateCustomSymPattern();
+				
+				chrome.tabs.onUpdated.addListener(onTabUpdated);
+				chrome.tabs.onRemoved.addListener(onTabClosed);
+				chrome.extension.onRequest.addListener(onRequest);
+				if( updated ){
+					//chrome.tabs.create({url: "settings/index.html"});
+					showOptionPage();
+				}
+			});
 		},
 		tabStatus : tabStatus,
 		
+		getSettings : function(){
+			return settings;
+		},
 		getSyms : function(){
-			return settings.get("patternTable").syms.chars;
+			return patternTable.syms.chars;
 		},
 		updateSettings : function(symValues){
 			updateCustomSymPattern(symValues);
@@ -468,6 +451,8 @@
 		getCustomSymPattern : function(){
 			return customSymPattern;
 		},
+		showOptionPage : showOptionPage,
+		
 		enableUnitTest : false
 	};
 })();

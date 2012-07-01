@@ -11,7 +11,7 @@
 	"background" : {
 		"scripts":[
 			"lib/jquery-1.7.1.min.js",
-			"lib/fancy-settings/source/lib/store.js",
+			"settings/store.js",
 			"js/background.js"
 		]
 	},
