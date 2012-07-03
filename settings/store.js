@@ -1,7 +1,8 @@
-//
-// Copyright (c) 2011 Frank Kohlhepp
-// https://github.com/frankkohlhepp/store-js
-// License: MIT-license
+// Store.js for chrome.storage @soranchu
+// based on : 
+//   Copyright (c) 2011 Frank Kohlhepp
+//   https://github.com/frankkohlhepp/store-js
+//   License: MIT-license
 //
 (function () {
     var Store = this.Store = function (name, defaults, onReady) {
@@ -44,20 +45,12 @@
     };
 
     Store.prototype.addListener = function (name, fn) {
-    	console.log("settings listener added for " + name);
+    	//console.log("settings listener added for " + name);
     	this.changedListeners[name] = fn;
     };
 
     Store.prototype.get = function (name) {
     	return this.cache[name];
-    	/*
-        name = "store." + this.name + "." + name;
-        if (localStorage.getItem(name) === null) { return undefined; }
-        try {
-            return JSON.parse(localStorage.getItem(name));
-        } catch (e) {
-            return null;
-        }*/
     };
     
     Store.prototype.set = function (name, value) {
@@ -66,15 +59,8 @@
         } else {
             if (typeof value === "function") {
                 value = null;
-            } /* else {
-                try {
-                    value = JSON.stringify(value);
-                } catch (e) {
-                    value = null;
-                }
             }
-            localStorage.setItem("store." + this.name + "." + name, value);
-            */
+            
             this.cache[name] = value;
             var change = {};
             change[name] = value;
@@ -96,17 +82,6 @@
     };
     
     Store.prototype.removeAll = function () {
-        /*
-    	var name,
-            i;
-        
-        name = "store." + this.name + ".";
-        for (i = (localStorage.length - 1); i >= 0; i--) {
-            if (localStorage.key(i).substring(0, name.length) === name) {
-                localStorage.removeItem(localStorage.key(i));
-            }
-        }
-        */
     	this.cache = {};
         chrome.storage.sync.clear(function(){
         	console.log("storage.sync.clear() done");
@@ -116,25 +91,6 @@
     };
     
     Store.prototype.toObject = function () {
-        /*
-    	var values,
-            name,
-            i,
-            key,
-            value;
-        
-        values = {};
-        name = "store." + this.name + ".";
-        for (i = (localStorage.length - 1); i >= 0; i--) {
-            if (localStorage.key(i).substring(0, name.length) === name) {
-                key = localStorage.key(i).substring(name.length);
-                value = this.get(key);
-                if (value !== undefined) { values[key] = value; }
-            }
-        }
-        
-        return values;
-        */
     	return this.cache;
     };
     

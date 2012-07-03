@@ -1,4 +1,3 @@
-// SAMPLE
 this.manifest = {
     "name": "さよなら全角英数",
     "icon": "../res/icon_48.png",
@@ -67,14 +66,6 @@ this.manifest = {
             "type": "checkbox",
             "label": i18n.get("keep_heading_space")
         },
-        /*
-        {
-            "tab": i18n.get("details"),
-            "group": i18n.get("replace"),
-            "name": "replace_tilde",
-            "type": "checkbox",
-            "label": i18n.get("replace_tilde")
-        },*/
         {
             "tab": i18n.get("details"),
             "group": i18n.get("replace"),

@@ -30,6 +30,9 @@
 	var patternTable = null;
 	
 	var customSymPattern = "";
+	
+	var initialized = false;
+	var initWaiters = [];
 
 	var importFromLocalStorage = function(name){
 		var pat = localStorage.getItem("store.settings." + name);
@@ -62,7 +65,9 @@
 			localStorage.removeItem("store.settings.patternTable");
 			
 			localStorage.setItem("__version", 2.5);
-			showUpdatedPage = true;
+			if(parseFloat(prevVersion) < 2.4){
+				showUpdatedPage = true;
+			}
 		}
 		
 		return showUpdatedPage;
@@ -202,7 +207,9 @@
 	var setIconStatus = function(tabid){
 		var enabled = true;
 		var visible = false;
-		
+		if( typeof tabid  != "number" || tabid <= 0 ){
+			log("setIconStatus: invalid tabid:" + tabid);
+		}
 		if( tabStatus[tabid] ){
 			if( tabStatus[tabid].siteStatus === "HIGHLIGHT" ){
 				if( tabStatus[tabid].appended ){
@@ -242,8 +249,10 @@
 			}else{
 				chrome.pageAction.hide(tabid);
 			}
+			log("setIconStatus tab:" + tabid +" visible:" + visible + " enable:" + enabled);
 		}else{
 			chrome.pageAction.hide(tabid);
+			log("setIconStatus tab:" + tabid +" visible: false (undefined tabStatus)");
 		}
 		
 	};
@@ -306,12 +315,12 @@
 		var append = request.append;
 		
 		if( request.cmd === "loaded" ){
-			log("[bg] onRequest cmd:" + request.cmd + " sender:" + sender.tab.id + " url:" + request.url + " iframe:"+request.iframe );
-			
 			res.siteStatus = getSiteStatus(request.url);
 			res.pattern = getPattern();
 			res.supportAjax = settings.get("supportAjax");
 			res.keepHeadingMBSpace = settings.get("keepHeadingMBSpace");
+
+			log("[bg] onRequest cmd:" + request.cmd + " sender:" + sender.tab.id + " url:" + request.url + " iframe:"+request.iframe + " status:" + res.siteStatus);
 			
 			if (!iframe ){
 				if( res.siteStatus != "DISABLE" ){
@@ -423,18 +432,24 @@
 		urlMatcher : urlMatcher,
 		
 		init : function(){
+			createTranslateTable();
 			settings = new Store("settings", defaultOptions, function(){
 				var updated = importOldSettings();
-				createTranslateTable();
 				updateCustomSymPattern();
 				
 				chrome.tabs.onUpdated.addListener(onTabUpdated);
 				chrome.tabs.onRemoved.addListener(onTabClosed);
 				chrome.extension.onRequest.addListener(onRequest);
+				initialized = true;
+				for( var i = 0; i < initWaiters.length;++i){
+					(initWaiters[i])();
+				}
+				initWaiters = [];
 				if( updated ){
 					//chrome.tabs.create({url: "settings/index.html"});
 					showOptionPage();
 				}
+				log("init finished");
 			});
 		},
 		tabStatus : tabStatus,
@@ -442,6 +457,15 @@
 		getSettings : function(){
 			return settings;
 		},
+		
+		waitForInit : function(cb){
+			if( initialized ) {
+				cb();
+			}else{
+				initWaiters.push(cb);
+			}
+		},
+		
 		getSyms : function(){
 			return patternTable.syms.chars;
 		},

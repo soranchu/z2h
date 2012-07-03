@@ -1,30 +1,6 @@
 function log(str){
 	//console.log(str);
 }
-/*
-function makeRegExp(settings, option){
-	var pat = "";
-	if( settings.replace_alpha ){
-		pat += settings.patternTable.alpha.pat;
-	}
-	if( settings.replace_num ){
-		pat += settings.patternTable.num.pat;
-	}
-	if( settings.replace_sym ){
-		pat += settings.patternTable.syms.pat;
-	}
-	
-	//if( settings.replace_tilde ){
-	//	pat += settings.patternTable.tilde.pat;
-	//}
-	if( settings.replace_space ){
-		pat += settings.patternTable.space.pat;
-	}
-
-	if( pat.length == 0 )return null;
-	var opt = option || "";
-	return new RegExp("[" + pat + "]"+opt,"g" );
-}*/
 
 var translate = function(matcher, target, keepHeadingMBSpace){
 	var replaced = 0;
