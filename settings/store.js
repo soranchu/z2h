@@ -16,7 +16,7 @@
     		if (defaults !== undefined) {
                 for (key in defaults) {
                     if (defaults.hasOwnProperty(key) && this.get(key) === undefined) {
-                        this.set(key, defaults[key]);
+                        this.set(key, defaults[key], true);
                     }
                 }
 	        }
@@ -34,10 +34,12 @@
     					this.cache[key] = newv;
     				}
     				if( this.changedListeners[key] && typeof  this.changedListeners[key] === "function"){
+    					var isDefault = false;
     					if( newv === undefined ){
     						newv = defaults[key];
+    						isDefault = true;
     					}
-    					this.changedListeners[key](newv);
+    					this.changedListeners[key](newv, isDefault);
     				}
     			}
     		}
@@ -53,7 +55,7 @@
     	return this.cache[name];
     };
     
-    Store.prototype.set = function (name, value) {
+    Store.prototype.set = function (name, value, isDefault) {
         if (value === undefined) {
             this.remove(name);
         } else {
@@ -62,11 +64,13 @@
             }
             
             this.cache[name] = value;
-            var change = {};
-            change[name] = value;
-            chrome.storage.sync.set(change,function(){
-            	console.log("storage.sync.set({"+name+":"+value+"}) done");
-            });
+            if( !isDefault ){
+            	var change = {};
+	            change[name] = value;
+	            chrome.storage.sync.set(change,function(){
+	            	console.log("storage.sync.set({"+name+":"+value+"}) done");
+	            });
+            }
         }
         
         return this;
