@@ -55,6 +55,13 @@ this.manifest = {
         {
             "tab": i18n.get("details"),
             "group": i18n.get("replace"),
+            "name": "replace_kana",
+            "type": "checkbox",
+            "label": i18n.get("replace_kana")
+        },
+        {
+            "tab": i18n.get("details"),
+            "group": i18n.get("replace"),
             "name": "replace_space",
             "type": "checkbox",
             "label": i18n.get("replace_space")
