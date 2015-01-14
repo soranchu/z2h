@@ -77,6 +77,7 @@ window.addEvent("domready", function () {
 	    	settings.manifest.supportHttps.label.innerHTML += '<span class="beta">[Beta]</span>';
 	    	settings.manifest.supportAjax.label.innerHTML += '<span class="beta">[Beta]</span>';
 	    	settings.manifest.keepHeadingMBSpace.label.innerHTML += '<span class="beta">[Beta]</span>';
+	    	settings.manifest.replace_kana.label.innerHTML += '<span class="beta">[Beta]</span>';
 	    	
 	    }, this.extraTypes );
 	}.bind(this));

@@ -10,6 +10,7 @@
 	    "highlightPages": [],
 	    "replace_alpha": true,
 	    "replace_num": true,
+	    "replace_kana": true,
 	    "replace_space": true,
 	    "replace_sym": true,
 	    "replaceSymOptions" : [
@@ -48,7 +49,7 @@
 		var showUpdatedPage = false;
 		
 		var prevVersion = localStorage.getItem("__version");
-		if( ! prevVersion || parseFloat(prevVersion) <= 2.4 ){
+		if( ! prevVersion || parseFloat(prevVersion) <= 2.5 ){
 			//update chrome.storage.sync from localStorage
 			importFromLocalStorage("highlightPages");
 			importFromLocalStorage("ignoreDomains");
@@ -57,6 +58,7 @@
 			importFromLocalStorage("replaceSymOptions");
 			importFromLocalStorage("replace_alpha");
 			importFromLocalStorage("replace_num");
+			importFromLocalStorage("replace_kana");
 			importFromLocalStorage("replace_space");
 			importFromLocalStorage("replace_sym");
 			importFromLocalStorage("supportAjax");
@@ -64,8 +66,8 @@
 			
 			localStorage.removeItem("store.settings.patternTable");
 			
-			localStorage.setItem("__version", 2.5);
-			if(parseFloat(prevVersion) < 2.4){
+			localStorage.setItem("__version", 2.6);
+			if(parseFloat(prevVersion) < 2.5){
 				showUpdatedPage = true;
 			}
 		}
@@ -94,8 +96,9 @@
 			//pat.syms_custom = pat.syms;
 			//pat.tilde = makePattern([{from:'～',to:'～'}]);
 			pat.space = makePattern([{from:'　',to:'　'}]);
+			//pat.kana = makePattern([{from:'｡',to:'ﾟ'}]);
 		
-			pat._version = 2.4;
+			pat._version = 2.5;
 			
 			patternTable = pat;
 		//}
@@ -319,6 +322,7 @@
 			res.pattern = getPattern();
 			res.supportAjax = settings.get("supportAjax");
 			res.keepHeadingMBSpace = settings.get("keepHeadingMBSpace");
+			res.replace_kana = settings.get("replace_kana");
 
 			log("[bg] onRequest cmd:" + request.cmd + " sender:" + sender.tab.id + " url:" + request.url + " iframe:"+request.iframe + " status:" + res.siteStatus);
 			
