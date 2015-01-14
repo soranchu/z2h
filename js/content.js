@@ -9,12 +9,11 @@ var zen_dakuon_chars = 'ガギグゲゴザジズゼゾダヂヅデドバビブ�
 
 var han_zen_info = (function(){
 	var map = {};
-	for (var index=0, length=han_kana_chars.length; index<length; index++) map[han_kana_chars.charAt(index)] = zen_kana_chars.charAt(index);
 	var han_dakuon_list = han_dakuon_chars.match(/.{2}/g);
+	for (var index=0, length=han_kana_chars.length; index<length; index++) map[han_kana_chars.charAt(index)] = zen_kana_chars.charAt(index);
 	for (var index=0, length=han_dakuon_list.length; index<length; index++) map[han_dakuon_list[index]] = zen_dakuon_chars.charAt(index);
-	var kana_matcher =  new RegExp("[" + han_kana_chars + "]", "g");
-	var han_dakuon_matcher = new RegExp("(?:" + han_dakuon_list.join('|') + ")", "g");
-	return {map: map, kana_matcher: kana_matcher, han_dakuon_matcher: han_dakuon_matcher};
+	var kana_matcher = new RegExp("(?:" + han_dakuon_list.join('|') + "|[" + han_kana_chars +"])", "g");
+	return {map: map, kana_matcher: kana_matcher};
 })();
 
 var translate = function(matcher, target, keepHeadingMBSpace, replace_kana){
@@ -22,7 +21,6 @@ var translate = function(matcher, target, keepHeadingMBSpace, replace_kana){
 	var diff = 'Ａ'.charCodeAt(0) - 'A'.charCodeAt(0);
 	var han_zen_map = han_zen_info.map;
 	var kana_matcher = han_zen_info.kana_matcher;
-	var han_dakuon_matcher = han_zen_info.han_dakuon_matcher;
 	
 	var han_to_zen = function(matched) {
 		var zen_char = han_zen_map[matched];
@@ -41,7 +39,7 @@ var translate = function(matcher, target, keepHeadingMBSpace, replace_kana){
 			}
 		}
 		if (replace_kana) {
-    		str = str.replace(han_dakuon_matcher, han_to_zen).replace(kana_matcher, han_to_zen);
+    		str = str.replace(kana_matcher, han_to_zen);
 		}
 		str = str.replace(matcher,function(matched){
 			replaced++;
